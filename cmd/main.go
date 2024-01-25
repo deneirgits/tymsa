@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"tymsa/internal/auth"
 	"tymsa/internal/server"
 )
 
 func main() {
 
+	auth.NewAuth()
 	server := server.NewServer()
 
 	err := server.ListenAndServe()
