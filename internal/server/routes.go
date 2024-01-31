@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -17,27 +16,21 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	r.Get("/", s.HelloWorldHandler)
-	r.Get("/auth/{provider}", s.beginAuthProvider)
-	r.Get("/auth/{provider}/callback", s.getAuthCallback)
-	r.Get("/health", s.healthHandler)
+	r.Get("/", s.AppHandler)
+	r.Get("/auth", s.beginAuthProvider)
+	r.Get("/auth/callback", s.getAuthCallback)
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
 	return r
 }
 
-func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	components.Hello().Render(r.Context(), w)
-}
-
-func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
-	jsonResp, _ := json.Marshal(s.db.Health())
-	_, _ = w.Write(jsonResp)
+func (s *Server) AppHandler(w http.ResponseWriter, r *http.Request) {
+	components.Index().Render(r.Context(), w)
 }
 
 func (s *Server) getAuthCallback(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	q.Add("provider", chi.URLParam(r, "provider"))
+	q.Add("provider", "openid-connect")
 	r.URL.RawQuery = q.Encode()
 
 	user, err := gothic.CompleteUserAuth(w, r)
@@ -53,7 +46,7 @@ func (s *Server) getAuthCallback(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) beginAuthProvider(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	q.Add("provider", chi.URLParam(r, "provider"))
+	q.Add("provider", "openid-connect")
 	r.URL.RawQuery = q.Encode()
 
 	gothic.BeginAuthHandler(w, r)

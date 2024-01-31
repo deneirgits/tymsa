@@ -3,6 +3,8 @@ package auth
 import (
 	"os"
 
+	"strconv"
+
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
@@ -10,11 +12,12 @@ import (
 	"github.com/markbates/goth/providers/openidConnect"
 )
 
-const (
-	key    = "key"
-	MaxAge = 86400 * 30 // 1 month
-	IsProd = false
+var (
+	key    = os.Getenv("SECRET_KEY")
+	isProd = os.Getenv("IS_PROD")
 )
+
+const MaxAge = 86400 * 30 // 1 month
 
 func NewAuth() {
 	err := godotenv.Load()
@@ -28,16 +31,21 @@ func NewAuth() {
 	store := sessions.NewCookieStore([]byte(key))
 	store.MaxAge(MaxAge)
 
+	isProd, err := strconv.ParseBool(isProd)
+	if err != nil {
+		isProd = false
+	}
+
 	store.Options.Path = "/"
 	store.Options.HttpOnly = true
-	store.Options.Secure = IsProd
+	store.Options.Secure = isProd
 
 	gothic.Store = store
 
 	openidConnect, err := openidConnect.New(
 		clientId,
 		clientSecret,
-		"http://localhost:8080/auth/openid-connect/callback",
+		"http://localhost:8080/auth/callback",
 		os.Getenv("KEYCLOAK_DISCOVERY_URL"),
 	)
 	if err != nil {
