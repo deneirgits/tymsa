@@ -3,10 +3,17 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 
 	"tymsa/components"
+	"tymsa/internal/middleware"
 
 	"github.com/markbates/goth/gothic"
+)
+
+var (
+	isProd = os.Getenv("IS_PROD")
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -18,7 +25,18 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("GET /auth/callback", s.getAuthCallback)
 	mux.Handle("GET /static/*", http.StripPrefix("/static/", fs))
 
-	return mux
+	var wrappedMux http.Handler = middleware.NewValidateAuth(mux)
+
+	isProd, err := strconv.ParseBool(isProd)
+	if err != nil {
+		isProd = false
+	}
+
+	if !isProd {
+		wrappedMux = middleware.NewLogger(wrappedMux)
+	}
+
+	return wrappedMux
 }
 
 func (s *Server) AppHandler(w http.ResponseWriter, r *http.Request) {
