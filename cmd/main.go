@@ -9,6 +9,8 @@ import (
 func main() {
 
 	auth.NewAuth()
+	auth.GetPublicKeys()
+
 	server := server.NewServer()
 
 	err := server.ListenAndServe()

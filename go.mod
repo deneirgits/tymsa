@@ -3,6 +3,7 @@ module tymsa
 go 1.22
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/gorilla/sessions v1.2.2
 	github.com/jackc/pgx/v5 v5.5.2
 	github.com/joho/godotenv v1.5.1

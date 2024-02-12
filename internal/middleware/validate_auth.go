@@ -1,6 +1,9 @@
 package middleware
 
-import "net/http"
+import (
+	// "github.com/golang-jwt/jwt/v5"
+	"net/http"
+)
 
 type ValidateAuth struct {
 	handler http.Handler
