@@ -1,21 +1,22 @@
-import { Text, StyleSheet, View } from "react-native";
+import { SheetManager, SheetProvider } from "react-native-actions-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import "./sheets";
+import { TouchableOpacity } from "react-native";
+import { useEffect } from "react";
 
 export default function Index() {
+  useEffect(() => {
+    SheetManager.show("current-timer");
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Home screen</Text>
-    </View>
+    <SafeAreaProvider>
+      <GestureHandlerRootView className="flex">
+        <SheetProvider context="global">
+          <SafeAreaView />
+        </SheetProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#25292e",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  text: {
-    color: "#fff",
-  },
-});
