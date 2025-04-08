@@ -45,6 +45,12 @@ export const authConfig = {
   ],
   adapter: PrismaAdapter(db),
   callbacks: {
+    signIn: ({ user }) => {
+      if (user.email == process.env.ALLOWED_EMAIL) {
+        return true;
+      }
+      return false;
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {
