@@ -19,9 +19,7 @@ export function LatestPost() {
   return (
     <div className="w-full max-w-xs">
       {latestTimer ? (
-        <p className="truncate">
-          Your most recent post: {latestTimer.duration}
-        </p>
+        <p className="truncate">Your most recent post: {latestTimer.id}</p>
       ) : (
         <p>You have no posts yet.</p>
       )}

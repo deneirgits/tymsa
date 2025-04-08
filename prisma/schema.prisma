@@ -74,7 +74,7 @@ model Timer {
   startDatetime DateTime  @default(now())
   endDatetime   DateTime?
   note          String?   @db.VarChar(30)
-  duration      Int? // Stored as seconds — Prisma doesn't support native Duration, so use Int or Float
+  duration      String? // Stored as string — Prisma doesn't support Duration Interval field type
   previousId    Int?
   previous      Timer?    @relation("PreviousTimer", fields: [previousId], references: [id], onDelete: SetNull)
   next          Timer[]   @relation("PreviousTimer")
