@@ -1,15 +1,16 @@
 import Link from "next/link";
 
-import { LatestTimer } from "~/app/_components/timer";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
-import { RecentTimers } from "./_components/timers";
+
+import { TimerDrawer } from "./_components/timer-drawer";
 
 export default async function Home() {
   const session = await auth();
 
   if (session?.user) {
-    void api.timer.getLatest.prefetch();
+    void api.timer.getCurrent.prefetch();
+    void api.timer.getRecent.prefetch();
   }
 
   return (
@@ -30,10 +31,7 @@ export default async function Home() {
             </div>
           </div>
         </div>
-        <div>
-          {session?.user && <LatestTimer />}
-          {session?.user && <RecentTimers />}
-        </div>
+        <div>{session?.user && <TimerDrawer />}</div>
       </main>
     </HydrateClient>
   );

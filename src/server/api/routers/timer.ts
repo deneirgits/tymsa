@@ -14,13 +14,14 @@ export const timerRouter = createTRPCRouter({
   //     });
   //   }),
 
-  getLatest: protectedProcedure.query(async ({ ctx }) => {
+  getCurrent: protectedProcedure.query(async ({ ctx }) => {
     const timer = await ctx.db.timer.findFirst({
       orderBy: { startDatetime: "desc" },
       include: {
         project: {
           select: {
             name: true,
+            color: true,
           },
         },
       },
@@ -32,11 +33,21 @@ export const timerRouter = createTRPCRouter({
   getRecent: protectedProcedure.query(async ({ ctx }) => {
     const timers = await ctx.db.timer.findMany({
       orderBy: { id: "desc" },
-      where: { startDatetime: { gte: sub(new Date(), { days: 1 }) } },
+      where: {
+        startDatetime: { gte: sub(new Date(), { days: 5 }) },
+        endDatetime: { not: null },
+      }, // TODO: Remove lines after startNewTimer is implemented
+
+      // where: {
+      //   startDatetime: { gte: sub(new Date(), { days: 10 }) },
+      //   endDatetime: { not: null },
+      // }, // TODO: Uncomment lines after startNewTimer is implemented
+
       include: {
         project: {
           select: {
             name: true,
+            color: true,
           },
         },
       },
