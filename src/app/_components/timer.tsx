@@ -4,8 +4,8 @@ import { differenceInSeconds } from "node_modules/date-fns/fp/differenceInSecond
 import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 
-export function LatestTimer() {
-  const [timer] = api.timer.getLatest.useSuspenseQuery();
+export function CurrentTimer() {
+  const [timer] = api.timer.getCurrent.useSuspenseQuery();
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
