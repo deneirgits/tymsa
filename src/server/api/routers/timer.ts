@@ -1,22 +1,51 @@
 import { sub } from "date-fns";
+import { formatDuration } from "~/lib/utils";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  type createTRPCContext,
+  createTRPCRouter,
+  protectedProcedure,
+} from "~/server/api/trpc";
+
+type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+
+async function findCurrent(ctx: Context) {
+  return ctx.db.timer.findFirst({
+    orderBy: { startDatetime: "desc" },
+    include: {
+      project: {
+        select: {
+          name: true,
+          color: true,
+        },
+      },
+    },
+  });
+}
 
 export const timerRouter = createTRPCRouter({
-  // start: protectedProcedure
-  //   .input(z.object({ name: z.string().min(1) }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     return ctx.db.timer.create({
-  //       data: {
-  //         name: input.name,
-  //         createdBy: { connect: { id: ctx.session.user.id } },
-  //       },
-  //     });
-  //   }),
+  startNew: protectedProcedure.mutation(async ({ ctx }) => {
+    const timer = await findCurrent(ctx);
+    const currentTime = new Date();
+    const duration = timer?.startDatetime
+      ? formatDuration(
+          currentTime.getTime() - new Date(timer?.startDatetime).getTime(),
+        )
+      : "00:00:00";
 
-  getCurrent: protectedProcedure.query(async ({ ctx }) => {
-    const timer = await ctx.db.timer.findFirst({
-      orderBy: { startDatetime: "desc" },
+    await ctx.db.timer.update({
+      where: { id: timer?.id },
+      data: {
+        endDatetime: currentTime,
+        duration: duration,
+      },
+    });
+
+    return ctx.db.timer.create({
+      data: {
+        startDatetime: currentTime,
+        previousId: timer?.id,
+      },
       include: {
         project: {
           select: {
@@ -26,6 +55,10 @@ export const timerRouter = createTRPCRouter({
         },
       },
     });
+  }),
+
+  getCurrent: protectedProcedure.query(async ({ ctx }) => {
+    const timer = findCurrent(ctx);
 
     return timer ?? null;
   }),
@@ -34,15 +67,8 @@ export const timerRouter = createTRPCRouter({
     const timers = await ctx.db.timer.findMany({
       orderBy: { id: "desc" },
       where: {
-        startDatetime: { gte: sub(new Date(), { days: 10 }) },
-        endDatetime: { not: null },
-      }, // TODO: Remove lines after startNewTimer is implemented
-
-      // where: {
-      //   startDatetime: { gte: sub(new Date(), { days: 10 }) },
-      //   endDatetime: { not: null },
-      // }, // TODO: Uncomment lines after startNewTimer is implemented
-
+        endDatetime: { gte: sub(new Date(), { days: 1 }) },
+      },
       include: {
         project: {
           select: {
