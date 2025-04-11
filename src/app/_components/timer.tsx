@@ -38,7 +38,7 @@ export function CurrentTimer() {
             <span className="text-md">{timer.project?.name}</span>
           </div>
           <Button variant="ghost" size="icon">
-            <CircleStop className="size-12" />
+            <CircleStop className="size-12" strokeWidth={1.5} />
           </Button>
         </div>
       ) : (
