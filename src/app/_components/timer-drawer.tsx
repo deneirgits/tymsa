@@ -1,8 +1,16 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useMediaQuery } from "usehooks-ts";
 import { CurrentTimer } from "~/app/_components/timer";
 import { RecentTimers } from "~/app/_components/timers";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
@@ -16,6 +24,7 @@ import { Separator } from "~/components/ui/separator";
 export function TimerDrawer() {
   const snapPoints: [number, number] = [0.3, 1];
   const [snap, setSnap] = useState<number | string | null>(snapPoints[0]);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +46,30 @@ export function TimerDrawer() {
     }
   };
 
+  if (isDesktop) {
+    return (
+      <Dialog open={true}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              <CurrentTimer />
+            </DialogTitle>
+            <DialogDescription hidden={true}>Current timer</DialogDescription>
+          </DialogHeader>
+
+          <Separator />
+
+          <ScrollArea
+            className="max-h-[80vh] overflow-x-hidden"
+            onWheel={handleUpScroll}
+          >
+            <RecentTimers />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Drawer
       modal={false}
@@ -55,7 +88,7 @@ export function TimerDrawer() {
           <DrawerTitle>
             <CurrentTimer />
           </DrawerTitle>
-          <DrawerDescription hidden={true}>Timer</DrawerDescription>
+          <DrawerDescription hidden={true}>Current timer</DrawerDescription>
         </DrawerHeader>
 
         <div className="p-2">
@@ -64,7 +97,7 @@ export function TimerDrawer() {
 
         <ScrollArea
           ref={scrollRef}
-          className="overflow-scroll px-4"
+          className="overflow-scroll p-4"
           onWheel={handleUpScroll}
         >
           <RecentTimers />
