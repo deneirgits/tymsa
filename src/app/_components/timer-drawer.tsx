@@ -48,7 +48,7 @@ export function TimerDrawer() {
 
   if (isDesktop) {
     return (
-      <Dialog open={true}>
+      <Dialog open={true} modal={false}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
@@ -60,7 +60,7 @@ export function TimerDrawer() {
           <Separator />
 
           <ScrollArea
-            className="max-h-[80vh] overflow-x-hidden"
+            className="max-h-[65vh] overflow-x-hidden"
             onWheel={handleUpScroll}
           >
             <RecentTimers />

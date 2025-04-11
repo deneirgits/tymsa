@@ -1,7 +1,9 @@
 "use client";
 
+import { CircleStop } from "lucide-react";
 import { differenceInSeconds } from "node_modules/date-fns/fp/differenceInSeconds.cjs";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
 export function CurrentTimer() {
@@ -28,11 +30,17 @@ export function CurrentTimer() {
   };
 
   return (
-    <div className="w-full max-w-xs">
+    <div className="w-full">
       {timer ? (
-        <p className="truncate">
-          {formatTime(elapsedSeconds)} <span>{timer.project?.name}</span>
-        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">{formatTime(elapsedSeconds)}</h1>
+            <span className="text-md">{timer.project?.name}</span>
+          </div>
+          <Button variant="ghost" size="icon">
+            <CircleStop className="size-12" />
+          </Button>
+        </div>
       ) : (
         <p>You have no timers yet.</p>
       )}
