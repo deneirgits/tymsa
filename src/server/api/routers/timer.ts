@@ -34,7 +34,7 @@ export const timerRouter = createTRPCRouter({
     const timers = await ctx.db.timer.findMany({
       orderBy: { id: "desc" },
       where: {
-        startDatetime: { gte: sub(new Date(), { days: 5 }) },
+        startDatetime: { gte: sub(new Date(), { days: 10 }) },
         endDatetime: { not: null },
       }, // TODO: Remove lines after startNewTimer is implemented
 
