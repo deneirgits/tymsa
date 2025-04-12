@@ -1,11 +1,16 @@
-"use client";
-
+import { Square } from "lucide-react";
 import { differenceInSeconds } from "node_modules/date-fns/fp/differenceInSeconds.cjs";
-import { useState, useEffect } from "react";
-import { api } from "~/trpc/react";
+import { useEffect, useState } from "react";
+import { Button } from "~/components/ui/button";
+import { formatTime } from "~/lib/utils";
+import type { CurrentTimerType } from "~/types";
 
-export function CurrentTimer() {
-  const [timer] = api.timer.getCurrent.useSuspenseQuery();
+type CurrentTimerProps = {
+  timer: CurrentTimerType | undefined | null;
+  onButtonClick: () => Promise<void>;
+};
+
+export function CurrentTimer({ timer, onButtonClick }: CurrentTimerProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
@@ -20,19 +25,27 @@ export function CurrentTimer() {
     return () => clearInterval(interval);
   }, [timer]);
 
-  const formatTime = (seconds: number) => {
-    const hrs = String(Math.floor(seconds / 3600)).padStart(2, "0");
-    const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
-    const secs = String(seconds % 60).padStart(2, "0");
-    return `${hrs}:${mins}:${secs}`;
-  };
-
   return (
-    <div className="w-full max-w-xs">
+    <div className="w-full">
       {timer ? (
-        <p className="truncate">
-          {formatTime(elapsedSeconds)} <span>{timer.project?.name}</span>
-        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold">
+              {formatTime(elapsedSeconds)}
+            </h1>
+            <span className="text-md">{timer.project?.name}</span>
+          </div>
+          <Button
+            size="icon"
+            className="cursor-pointer rounded-full border bg-gradient-to-r from-red-300 to-red-600 p-7 shadow hover:bg-gradient-to-r hover:from-red-200 hover:to-red-500"
+            onClick={async (e) => {
+              e.stopPropagation();
+              await onButtonClick();
+            }}
+          >
+            <Square className="size-5" strokeWidth={3} />
+          </Button>
+        </div>
       ) : (
         <p>You have no timers yet.</p>
       )}

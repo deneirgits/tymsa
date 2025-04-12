@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "~/lib/utils";
+
 import { useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { CurrentTimer } from "~/app/_components/timer";
@@ -20,19 +22,28 @@ import {
 } from "~/components/ui/drawer";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
+import { api } from "~/trpc/react";
 
 export function TimerDrawer() {
-  const snapPoints: [number, number] = [0.3, 1];
+  const { data: timer, refetch: refetchTimer } =
+    api.timer.getCurrent.useQuery();
+  const timerMutation = api.timer.startNew.useMutation();
+
+  const { data: timers, refetch: refetchTimers } =
+    api.timer.getRecent.useQuery();
+
+  const snapPoints: [number, number] = [0.35, 1];
   const [snap, setSnap] = useState<number | string | null>(snapPoints[0]);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const snapRef = useRef<HTMLDivElement>(null);
 
   const toggleSnap = () => {
     setSnap((prev) => (prev === snapPoints[0] ? snapPoints[1] : snapPoints[0]));
   };
 
-  const handleUpScroll = (e: React.WheelEvent<HTMLDivElement>) => {
+  const closeOnOverScroll = (e: React.WheelEvent<HTMLDivElement>) => {
     const el = scrollRef.current;
 
     if (el && el.scrollTop <= 0 && e.deltaY < -30) {
@@ -40,19 +51,25 @@ export function TimerDrawer() {
     }
   };
 
-  const handleDownScroll = (e: React.WheelEvent<HTMLDivElement>) => {
+  const openOnHeaderScroll = (e: React.WheelEvent<HTMLDivElement>) => {
     if (e.deltaY < 20) {
       setSnap(snapPoints[1]);
     }
   };
 
+  const handleNewTimer = async () => {
+    await timerMutation.mutateAsync();
+    await refetchTimer();
+    await refetchTimers();
+  };
+
   if (isDesktop) {
     return (
-      <Dialog open={true}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog open={true} modal={false}>
+        <DialogContent className="sm:max-w-xs">
           <DialogHeader>
             <DialogTitle>
-              <CurrentTimer />
+              <CurrentTimer timer={timer} onButtonClick={handleNewTimer} />
             </DialogTitle>
             <DialogDescription hidden={true}>Current timer</DialogDescription>
           </DialogHeader>
@@ -60,10 +77,10 @@ export function TimerDrawer() {
           <Separator />
 
           <ScrollArea
-            className="max-h-[80vh] overflow-x-hidden"
-            onWheel={handleUpScroll}
+            className="max-h-[65vh] overflow-x-hidden"
+            onWheel={closeOnOverScroll}
           >
-            <RecentTimers />
+            <RecentTimers timers={timers} />
           </ScrollArea>
         </DialogContent>
       </Dialog>
@@ -83,24 +100,26 @@ export function TimerDrawer() {
         <DrawerHeader
           aria-describedby="timer"
           onClick={toggleSnap}
-          onWheel={handleDownScroll}
+          onWheel={openOnHeaderScroll}
         >
           <DrawerTitle>
-            <CurrentTimer />
+            <CurrentTimer timer={timer} onButtonClick={handleNewTimer} />
           </DrawerTitle>
           <DrawerDescription hidden={true}>Current timer</DrawerDescription>
         </DrawerHeader>
 
-        <div className="p-2">
+        <div className="px-4" ref={snapRef}>
           <Separator />
         </div>
 
         <ScrollArea
           ref={scrollRef}
-          className="overflow-scroll p-4"
-          onWheel={handleUpScroll}
+          className={cn("overflow-scroll p-4", {
+            "h-[65lvh]": snap == snapPoints[0],
+          })}
+          onWheel={closeOnOverScroll}
         >
-          <RecentTimers />
+          <RecentTimers timers={timers} />
         </ScrollArea>
       </DrawerContent>
     </Drawer>
