@@ -1,4 +1,5 @@
 import { sub } from "date-fns";
+import { z } from "zod";
 import { formatDuration } from "~/lib/utils";
 
 import {
@@ -15,6 +16,7 @@ async function findCurrent(ctx: Context) {
     include: {
       project: {
         select: {
+          id: true,
           name: true,
           color: true,
         },
@@ -49,6 +51,7 @@ export const timerRouter = createTRPCRouter({
       include: {
         project: {
           select: {
+            id: true,
             name: true,
             color: true,
           },
@@ -72,6 +75,7 @@ export const timerRouter = createTRPCRouter({
       include: {
         project: {
           select: {
+            id: true,
             name: true,
             color: true,
           },
@@ -86,4 +90,17 @@ export const timerRouter = createTRPCRouter({
 
     return cleanedTimers ?? null;
   }),
+
+  updateProject: protectedProcedure
+    .input(z.object({ timerId: z.number(), projectId: z.nullable(z.number()) }))
+    .mutation(async ({ ctx, input }) => {
+      const timer = await ctx.db.timer.update({
+        where: { id: input.timerId },
+        data: {
+          projectId: input.projectId,
+        },
+      });
+
+      return timer;
+    }),
 });
