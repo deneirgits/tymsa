@@ -23,6 +23,7 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { api } from "~/trpc/react";
+import { ProjectProvider } from "~/contexts/ProjectContext";
 
 export function TimerDrawer() {
   const { data: timer, refetch: refetchTimer } =
@@ -66,22 +67,24 @@ export function TimerDrawer() {
   if (isDesktop) {
     return (
       <Dialog open={true} modal={false}>
-        <DialogContent className="sm:max-w-xs">
-          <DialogHeader>
-            <DialogTitle>
-              <CurrentTimer timer={timer} onButtonClick={handleNewTimer} />
-            </DialogTitle>
-            <DialogDescription hidden={true}>Current timer</DialogDescription>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-sm">
+          <ProjectProvider>
+            <DialogHeader>
+              <DialogTitle>
+                <CurrentTimer timer={timer} onButtonClick={handleNewTimer} />
+              </DialogTitle>
+              <DialogDescription hidden={true}>Current timer</DialogDescription>
+            </DialogHeader>
 
-          <Separator />
+            <Separator />
 
-          <ScrollArea
-            className="max-h-[65vh] overflow-x-hidden"
-            onWheel={closeOnOverScroll}
-          >
-            <RecentTimers timers={timers} />
-          </ScrollArea>
+            <ScrollArea
+              className="max-h-[65vh] overflow-x-hidden"
+              onWheel={closeOnOverScroll}
+            >
+              <RecentTimers timers={timers} />
+            </ScrollArea>
+          </ProjectProvider>
         </DialogContent>
       </Dialog>
     );
@@ -97,30 +100,32 @@ export function TimerDrawer() {
       open={true}
     >
       <DrawerContent aria-describedby="timer drawer">
-        <DrawerHeader
-          aria-describedby="timer"
-          onClick={toggleSnap}
-          onWheel={openOnHeaderScroll}
-        >
-          <DrawerTitle>
-            <CurrentTimer timer={timer} onButtonClick={handleNewTimer} />
-          </DrawerTitle>
-          <DrawerDescription hidden={true}>Current timer</DrawerDescription>
-        </DrawerHeader>
+        <ProjectProvider>
+          <DrawerHeader
+            aria-describedby="timer"
+            onClick={toggleSnap}
+            onWheel={openOnHeaderScroll}
+          >
+            <DrawerTitle>
+              <CurrentTimer timer={timer} onButtonClick={handleNewTimer} />
+            </DrawerTitle>
+            <DrawerDescription hidden={true}>Current timer</DrawerDescription>
+          </DrawerHeader>
 
-        <div className="px-4" ref={snapRef}>
-          <Separator />
-        </div>
+          <div className="px-4" ref={snapRef}>
+            <Separator />
+          </div>
 
-        <ScrollArea
-          ref={scrollRef}
-          className={cn("overflow-scroll p-4", {
-            "h-[65lvh]": snap == snapPoints[0],
-          })}
-          onWheel={closeOnOverScroll}
-        >
-          <RecentTimers timers={timers} />
-        </ScrollArea>
+          <ScrollArea
+            ref={scrollRef}
+            className={cn("overflow-scroll p-4", {
+              "h-[65lvh]": snap == snapPoints[0],
+            })}
+            onWheel={closeOnOverScroll}
+          >
+            <RecentTimers timers={timers} />
+          </ScrollArea>
+        </ProjectProvider>
       </DrawerContent>
     </Drawer>
   );

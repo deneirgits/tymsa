@@ -1,5 +1,6 @@
 import { timerRouter } from "~/server/api/routers/timer";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { projectRouter } from "./routers/projects";
 
 /**
  * This is the primary router for your server.
@@ -8,6 +9,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   timer: timerRouter,
+  project: projectRouter,
 });
 
 // export type definition of API

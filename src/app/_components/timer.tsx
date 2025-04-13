@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { formatTime } from "~/lib/utils";
 import type { CurrentTimerType } from "~/types";
+import { ProjectSelect } from "./project-select";
 
 type CurrentTimerProps = {
   timer: CurrentTimerType | undefined | null;
@@ -30,10 +31,10 @@ export function CurrentTimer({ timer, onButtonClick }: CurrentTimerProps) {
       {timer ? (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold">
+            <h1 className="w-24 text-2xl font-semibold">
               {formatTime(elapsedSeconds)}
             </h1>
-            <span className="text-md">{timer.project?.name}</span>
+            <ProjectSelect timer={timer} />
           </div>
           <Button
             size="icon"
